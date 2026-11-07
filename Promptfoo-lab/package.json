@@ -1,0 +1,15 @@
+{
+  "name": "promptfoo-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Promptfoo prompt evaluations",
+  "scripts": {
+    "eval": "promptfoo eval",
+    "eval:smoke": "promptfoo eval -c smoke-models.yaml",
+    "eval:chatbot": "promptfoo eval -c chatbot-tests.yaml",
+    "view": "promptfoo view"
+  },
+  "devDependencies": {
+    "promptfoo": "0.125.1"
+  }
+}

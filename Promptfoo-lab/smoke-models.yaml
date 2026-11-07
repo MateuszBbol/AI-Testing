@@ -1,0 +1,15 @@
+description: 'Minimal API connection test'
+
+prompts:
+  - 'Reply with exactly: OK'
+
+providers:
+  - id: google:gemini-3.5-flash-lite
+    config:
+      # Keep headroom: thinking models spend output tokens before answering.
+      maxOutputTokens: 256
+
+tests:
+  - assert:
+      - type: javascript
+        value: output.trim() === "OK"
