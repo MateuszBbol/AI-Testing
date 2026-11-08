@@ -1,10 +1,19 @@
 # AI Testing
 
-Experiments with testing LLM prompts and models.
+A practical QA portfolio focused on evaluating AI-powered applications.
 
-| Folder | What it is |
-|---|---|
-| `Promptfoo-lab/` | [promptfoo](https://promptfoo.dev) evals: AI incident triage, a shop chatbot (incl. prompt-injection cases) and an API smoke test across Gemini, Groq and Cloudflare models |
+The repository currently contains a shop chatbot evaluation project.
+It explores how to turn business rules into test cases and assess
+whether AI-generated answers meet defined requirements.
 
-Each project has an `.env.example`; copy it to `.env` and fill in your own API keys.
-`.env` files are git-ignored and never committed.
+## Shop Chatbot Evaluation - Promptfoo tool
+
+**Status: In progress**
+
+The project evaluates a customer support chatbot for a fictional
+online store. The chatbot receives a store policy and is expected
+to answer customer questions accurately, acknowledge missing
+information, and respect its operational limitations.
+
+The policy is synthetic and intended for testing practice.
+It is not a policy for a real business or legal guidance.
