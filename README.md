@@ -1,4 +1,4 @@
-# AI Testing
+#AI Testing
 
 A practical QA portfolio focused on evaluating AI-powered applications.
 
@@ -6,7 +6,7 @@ The repository currently contains a shop chatbot evaluation project.
 It explores how to turn business rules into test cases and assess
 whether AI-generated answers meet defined requirements.
 
-## Shop Chatbot Evaluation - Promptfoo tool
+##Shop chatbot evaluation - Promptfoo tool
 
 **Status: In progress**
 
