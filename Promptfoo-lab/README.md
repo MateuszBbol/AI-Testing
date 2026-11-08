@@ -1,4 +1,4 @@
-# Promptfoo Lab
+#Promptfoo Lab
 
 A practical workspace for evaluating AI-powered applications with
 [Promptfoo](https://www.promptfoo.dev/).
@@ -18,9 +18,7 @@ Evaluations are learning projects developed incrementally.
 Coverage, findings, and limitations are documented within each project.
 
 ## Projects
-
-### 1. Northstar Store — Shop Chatbot Evaluation
-
+### 1. Northstar Store - Shop chatbot evaluation
 **Status:** In progress
 
 Evaluation of a customer support chatbot that answers questions using
