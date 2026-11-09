@@ -1,0 +1,297 @@
+description: "Shop chatbot - Preparing tests for common questions"
+
+providers:
+  - id: google:gemini-3.5-flash-lite
+    label: Gemini 3.5 Flash Lite
+    config:
+      temperature: 0
+      seed: 42
+      generationConfig:
+        thinkingConfig:
+          thinkingLevel: LOW
+
+  - id: google:gemini-3.6-flash
+    label: Gemini 3.6 Flash
+    config:
+      temperature: 0
+      seed: 42
+      generationConfig:
+        thinkingConfig:
+          thinkingLevel: LOW
+
+  - id: groq:openai/gpt-oss-20b
+    label: Groq
+    config:
+      temperature: 0
+      reasoning_effort: low
+      seed: 42
+
+  - id: cloudflare-ai:chat:@cf/meta/llama-3.1-8b-instruct-fp8
+    label: Cloudflare Llama 318b
+    config:
+      temperature: 0
+      seed: 42
+
+prompts:
+  - id: file://prompts.txt
+    label: Prompts definition
+
+defaultTest:
+  vars:
+    storePolicy: file://store-policy.txt
+    language: English
+
+  options:
+    provider: google:gemini-3.5-flash-lite
+
+  assert:
+    - type: javascript
+      value: output.trim().length > 0
+
+tests:
+  - description: "Scenario#1: Confirm payment status"
+    vars:
+      question: "Hello! Could you please confirm my payment status? My order number is NO-284"
+    assert:
+      - type: llm-rubric
+        value: |
+          The answer must be inline with our shop's policy
+          Fail if it gives a different answer or confuses.
+
+      - type: regex
+        value: 'NO-\d{3}'
+
+  - description: "Scenario#2: Discount questions"
+    vars:
+      question: |
+        "Hello! Do you have any discounts?"
+        "Do the discount have any specific requirements"
+        "What products are included in the discount?"
+    assert:
+      - type: llm-rubric
+        value: |
+          The answer must explain that WELCOME10 gives a 10% discount
+           on eligible full-price products.
+
+          It must state that the code does not apply to sale items,
+          gift cards, or shipping charges.
+
+          Fail if the answer invents other promotional codes,
+          gives an incorrect discount, or claims the code applies
+          to excluded items.
+
+      - type: contains
+        value: "WELCOME10"
+
+      - type: starts-with
+        value: "Hello"
+
+      - type: contains-all
+        value:
+          - "sale items"
+          - "gift"
+          - "shipping charges"
+
+  - description: "Scenario#3: Overview of Capabilities and Limitations"
+    vars:
+      question: |
+        "What can you do?"
+        "What can I ask you to help with, and what can't you do?"
+        "What are your limitations?"
+    assert:
+      - type: llm-rubric
+        value: |
+          The answer must clearly list all use cases and limitations of the chatbot.
+
+          Fail if the answer describes capabilities that the agent does not actually possess.
+
+          Fail if the answer identifies something as a limitation when it is actually a capability the agent should have.
+
+      - type: answer-relevance
+        threshold: 0.6
+        provider:
+          text: google:gemini-3.5-flash-lite
+          embedding: google:embedding:gemini-embedding-001
+
+      - type: factuality
+        value: >
+          The chatbot explains Northstar Store's policies on payments, shipping, returns, refunds, discounts, and gift cards. It answers common questions, asks for clarification when needed, and directs customers to support for further help.
+          It cannot access customer accounts, check order status, cancel orders, issue refunds, or perform actions in store systems.
+
+  - description: "Scenario#4: Payment methods"
+    vars:
+      question: |
+        "Can I pay by cash when the courier deliver my package?"
+        "Is it possible to pay by card on delivery?"
+        "What payment methods are accepted?"
+    assert:
+      - type: llm-rubric
+        value: |
+          The answer must clearly list all payment methods. Which one is applicable based if payment is on delivery or in advance
+          Fail if the answer describes impossible payment method.
+
+      - type: contains-all
+        value:
+          - "Visa"
+          - "Mastercard"
+          - "PayPal"
+
+  - description: "Scenario#5: Prices - company and individual client"
+    vars:
+      question: |
+        "Does the price includes all taxes"
+        "Does the price differ between individual client and company?"
+    assert:
+      - type: llm-rubric
+        value: |
+          The answer must clearly confirm that price include VAT.
+
+          Fail if answer create any additional redundant fees.
+
+          Fail if answer state that the price is different for company and individual client
+
+      - type: icontains
+        value:
+          "vat"
+
+  - description: "Scenario#6: Payment fail"
+    vars:
+      question: |
+        "What if my payment fails"
+        "I have confirmation on the site that may payment succeeded but account was not charged so far. I made a transfer a few days ago"
+    assert:
+      - type: llm-rubric
+        value: |
+          The answer must clearly inform the client what are the next steps.
+          Fail if assistant claim that charge succeeded, failed or will automatically be reversed.
+          Fail if assistant does not guide the client what should do next.
+
+      - type: contains-any
+        value:
+          - "succeeded"
+          - "failed"
+          - "reversed"
+
+  - description: "Scenario#7: Order confirmation"
+    vars:
+      question: |
+        "I've ordered from your shop 2 hours ago but I didn't received any confirmation"
+    assert:
+      - type: llm-rubric
+        value: |
+          The answer must clearly state what the customer should do when email does not arrive.
+
+          Fail if answer does not clearly state what customer should do next.
+
+      - type: icontains
+        value:
+          "15 minutes"
+
+  - description: "Scenario#:8 Delivery outside of the country"
+    vars:
+      question: |
+        "I live in Japan. Can I order something from the shop?"
+
+    assert:
+      - type: similar
+        value: "You can return the product within 30 days of delivery."
+        threshold: 0.8
+        provider: google:embedding:gemini-embedding-001
+
+  - description: "Scenario#9: Shipping below free delivery threshold"
+    vars:
+      question: >
+        My product subtotal after discounts is EUR 49.99.
+        Is standard shipping free?
+
+    assert:
+      - type: llm-rubric
+        value: >
+          The answer must explain that standard shipping is not free.
+          It costs EUR 4.99 because the subtotal after discounts.
+          is below EUR 50.
+
+      - type: not-contains
+        value: "free"
+
+  - description: "Scenario#:10 Order higher than threshold"
+    vars:
+      question: |
+        "I have order that cost 50 EUR and I want to get the package as soon as possible."
+        "Can I get the express delivery in this price?"
+
+    assert:
+      - type: llm-rubric
+        value: |
+          "The answer must explain that standard shipping is not free.
+          It costs EUR 4.99 because the subtotal after discounts.
+          is below EUR 50. If order > 50 EUR then standad shipping is free. Express delivery costs additional 9,99 EUR regardless of cost of the order"
+
+  - description: "Scenario#:11 Delivery time"
+    vars:
+      question: |
+        "I've ordered 5 minutes ago. My friend also ordered but picked Express delivery.
+        When we can expect packages?"
+
+    assert:
+      - type: llm-rubric
+        value: |
+          "Inform the User about delivery times. Explain the process and its stages, diefferencies between standard delivery and express
+          Fail if the answer not provides clear information about the stages and estimated time
+          Fail if the answer does not provide information that deadline are jus testaimated and may differ"
+
+      - type: contains-all
+        value:
+          - "1-2"
+
+      - type: contains-all
+        value:
+          - "2-5"
+
+  - description: "Scenario#:12 Cancel or modify the order"
+    vars:
+      question: |
+        "Can I modify the order? I've seen that my packages has already been sent"
+        "Can I cancel the order? It has just been paid and has a status 'New'"
+
+    assert:
+      - type: llm-rubric
+        value: |
+          "User must be informed that cancellation or any modifications can be done before package is sent
+          Fail if the answer provide vague or fake information"
+
+  - description: "Scenario#:13 Return policy"
+    vars:
+      question: |
+        "I bought things from your shop two weeks ago. Can I get the refund?"
+        "I want to return things that I've bought, how much time I have to sent it back?"
+
+    assert:
+      - type: llm-rubric
+        value: |
+          "Inform the user about the retur policy, keep the information consistent with the shop policy"
+          "Fail if information is inconsistent with shop policy"
+
+      - type: factuality
+        value: >
+          The chatbot explains Northstar Store's refund policy.
+
+      - type: contains-all
+        value:
+          - "30 days"
+          - "14 days"
+          - "day 0"
+
+  - description: "Scenario#:14 Return policy - used items"
+    vars:
+      question: |
+        "Can I return used item"
+        "I want to sent the packaged back? How can I order the courier and who is paying?"
+
+    assert:
+      - type: similar
+        value: "Product is unused, unwashed, and comes with the original tags and all accessories. The original box is optional. Return shipping costs are paid by the customer. Discounted items are subject to the same conditions."
+        threshold: 0.8
+        provider: google:embedding:gemini-embedding-001
+
+  - description: "Scenario#:15 Order higher than threshold"

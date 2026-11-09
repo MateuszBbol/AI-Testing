@@ -4,9 +4,9 @@
   "private": true,
   "description": "Promptfoo prompt evaluations",
   "scripts": {
-    "eval": "promptfoo eval",
-    "eval:smoke": "promptfoo eval -c smoke-models.yaml",
-    "eval:chatbot": "promptfoo eval -c chatbot-tests.yaml",
+    "eval": "promptfoo eval -c tests/promptfooconfig.yaml",
+    "eval:smoke": "promptfoo eval -c tests/smoke-models.yaml",
+    "eval:chatbot": "promptfoo eval -c tests/chatbot-tests.yaml",
     "view": "promptfoo view"
   },
   "devDependencies": {
