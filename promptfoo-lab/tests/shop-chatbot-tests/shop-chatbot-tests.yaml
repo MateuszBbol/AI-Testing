@@ -10,14 +10,14 @@ providers:
         thinkingConfig:
           thinkingLevel: LOW
 
-  - id: google:gemini-3.6-flash
-    label: Gemini 3.6 Flash
-    config:
-      temperature: 0
-      seed: 42
-      generationConfig:
-        thinkingConfig:
-          thinkingLevel: LOW
+  # - id: google:gemini-3.6-flash
+  #   label: Gemini 3.6 Flash
+  #   config:
+  #     temperature: 0
+  #     seed: 42
+  #     generationConfig:
+  #       thinkingConfig:
+  #         thinkingLevel: LOW
 
   - id: groq:openai/gpt-oss-20b
     label: Groq
@@ -42,7 +42,7 @@ defaultTest:
     language: English
 
   options:
-    provider: google:gemini-3.5-flash-lite
+    provider: groq:openai/gpt-oss-120b
 
   assert:
     - type: javascript
@@ -110,8 +110,8 @@ tests:
       - type: answer-relevance
         threshold: 0.6
         provider:
-          text: google:gemini-3.5-flash-lite
-          embedding: google:embedding:gemini-embedding-001
+          text: cloudflare-ai:chat:@cf/meta/llama-3.1-8b-instruct-fp8
+          embedding: cloudflare-ai:embedding:@cf/baai/bge-base-en-v1.5
 
       - type: factuality
         value: >
@@ -196,7 +196,7 @@ tests:
       - type: similar
         value: "You can return the product within 30 days of delivery."
         threshold: 0.8
-        provider: google:embedding:gemini-embedding-001
+        provider: cloudflare-ai:embedding:@cf/baai/bge-base-en-v1.5
 
   - description: "Scenario#9: Shipping below free delivery threshold"
     vars:
@@ -292,6 +292,4 @@ tests:
       - type: similar
         value: "Product is unused, unwashed, and comes with the original tags and all accessories. The original box is optional. Return shipping costs are paid by the customer. Discounted items are subject to the same conditions."
         threshold: 0.8
-        provider: google:embedding:gemini-embedding-001
-
-  - description: "Scenario#:15 Order higher than threshold"
+        provider: cloudflare-ai:embedding:@cf/baai/bge-base-en-v1.5

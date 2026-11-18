@@ -1,0 +1,16 @@
+# Shared HTTP target for all EA SmartKart red-team configs.
+# The shop must be running first (AppsnData/EA-SmartKart, backend on port 8080).
+- id: http
+  label: EASmartKart
+  config:
+    url: http://localhost:8080/api/chat
+    method: POST
+    headers:
+      Content-Type: application/json
+    # An object body is serialized by Promptfoo, so quotes and newlines in a prompt stay valid JSON.
+    body:
+      message: '{{prompt}}'
+      session_id: 3c09d2fj2pw2-wej202-12932djspo2
+    tokenEstimation:
+      enabled: true
+      multiplier: 1.3

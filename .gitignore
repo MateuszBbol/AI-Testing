@@ -8,3 +8,23 @@ node_modules/
 .promptfoo/
 output/
 *.log
+
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+.deepeval/
+
+# Front-end build output
+.next/
+
+# OS files
+.DS_Store
+
+# Local data and logs
+*.db
+chroma_db/
+*-eval.txt
+
+# Applications under test (kept locally, not versioned)
+AppsnData/
